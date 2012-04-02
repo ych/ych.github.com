@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[無盡的三拍子]]></title>
-  <link href="http://blog.ychuang.org/atom.xml" rel="self"/>
+  <title><![CDATA[Category: 胡言亂語 | 無盡的三拍子]]></title>
+  <link href="http://blog.ychuang.org/blog/categories/胡言亂語/atom.xml" rel="self"/>
   <link href="http://blog.ychuang.org/"/>
   <updated>2012-04-02T11:23:08+08:00</updated>
   <id>http://blog.ychuang.org/</id>
@@ -28,7 +28,7 @@
 </ul>
 
 
-<p>舊的 Blog 移到 http://oldblog.ychuang.org，沒有意外應該不會再更新了，不過某些設定因素，目前還沒生效，再等一個禮拜沒辦法修好就移出來好了&#8230;</p>
+<p>舊的 Blog 移到 http://oldblog.ychuang.org，沒有意外應該不會再更新了，不過某些設定因素，目前還沒生效，再等一個禮拜沒辦法修好就移出來好了...</p>
 ]]></content>
   </entry>
   
