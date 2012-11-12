@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>無盡的三拍子</title>
+  <title>Create a router which connect many LANs in ESXi - 無盡的三拍子</title>
   <meta name="author" content="ych">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://blog.ychuang.org/">
+  <link rel="canonical" href="http://blog.ychuang.org/blog/2012/11/12/create-a-router-which-connect-many-lans-in-esxi/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -62,15 +62,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/12/create-a-router-which-connect-many-lans-in-esxi/">Create a Router Which Connect Many LANs in ESXi</a></h1>
+      <h1 class="entry-title">Create a Router Which Connect Many LANs in ESXi</h1>
     
     
       <p class="meta">
@@ -93,7 +90,7 @@
   </header>
 
 
-  <div class="entry-content"><p>之前工作上有個需求，是在 ESXi 內區分出多個 LAN ，以便各同仁可以方便做 L2 實驗而不被干擾。但同時也要可以與其他同仁的機器互連。</p>
+<div class="entry-content"><p>之前工作上有個需求，是在 ESXi 內區分出多個 LAN ，以便各同仁可以方便做 L2 實驗而不被干擾。但同時也要可以與其他同仁的機器互連。</p>
 
 <p>要滿足以上條件，就是切出不同的 IP 網段，中間透過一台虛擬機器來做 routing，所以不同同仁互連是透過 L3，自己互連是 L2。</p>
 
@@ -139,22 +136,16 @@ vlan-raw-device eth1</p></blockquote></li>
 <p>參考資料
 <a href="https://wiki.ubuntu.com/vlan">Ubuntu wiki ~ vlan</a></p>
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/04/02/from-wordpress-to-octopress/">From Wordpress to Octopress</a></h1>
-    
-    
-      <p class="meta">
-        
+  
+
+<span class="byline author vcard">Posted by <span class="fn">ych</span></span>
+
+      
 
 
 
@@ -166,37 +157,38 @@ vlan-raw-device eth1</p></blockquote></li>
   
 
 
-<time datetime="2012-04-02T11:09:00+08:00" pubdate data-updated="true">Apr 2<span>nd</span>, 2012</time>
-        
-      </p>
+<time datetime="2012-11-12T21:26:00+08:00" pubdate data-updated="true">Nov 12<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/系統及網路管理/'>系統及網路管理</a>
+  
+</span>
+
+
+    </p>
     
-  </header>
-
-
-  <div class="entry-content"><p>為什麼會突然切換到 Octopress 呢？個人理由如下</p>
-
-<ul>
-<li><p>其實觀察這套系統很久了，喜歡玩新玩具的天性使然吧</p></li>
-<li><p>最近開始自己摸 Ruby 和 Rails 相關的東西，想說如果玩熟這套系統可能有助於目標吧(謎之聲：你的錯覺吧)</p></li>
-<li><p>Hosting 可以放 Github，簡單方便</p></li>
-<li><p>強迫自己熟悉 Makedown 的語法，以後寫文件會比較方便</p></li>
-</ul>
-
-
-<p>舊的 Blog 移到 http://oldblog.ychuang.org，沒有意外應該不會再更新了，不過某些設定因素，目前還沒生效，再等一個禮拜沒辦法修好就移出來好了&#8230;</p>
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.ychuang.org/blog/2012/11/12/create-a-router-which-connect-many-lans-in-esxi/" data-via="" data-counturl="http://blog.ychuang.org/blog/2012/11/12/create-a-router-which-connect-many-lans-in-esxi/" >Tweet</a>
+  
+  
+  
 </div>
-  
-  
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/04/02/from-wordpress-to-octopress/" title="Previous Post: From Wordpress to Octopress">&laquo; From Wordpress to Octopress</a>
+      
+      
+    </p>
+  </footer>
+</article>
 
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
 </div>
+
 <aside class="sidebar">
   
     <section>
@@ -221,6 +213,7 @@ vlan-raw-device eth1</p></blockquote></li>
 
   
 </aside>
+
 
     </div>
   </div>
