@@ -86,47 +86,88 @@
 
 <p>試了一下，發現這個 plugin 要插入 Original 的圖片時會有點問題 (VIP 錯了嗎？)，所以稍微研究了一下，發現 Original 的圖片透過 Flickr 的 API 的拿法跟其他大小的圖片會不太一下，所以自己把上面網頁提供的 API 更新如下：</p>
 
-<pre><code>require 'flickraw'                                                                                                                            
-class FlickrImage &lt; Liquid::Tag
+<figure class='code'><figcaption><span>flickr.rb </span><a href='https://raw.github.com/gist/4070800/a350c076a56064016de9b4a740ce594ced3dc49b/FlickrImage'>view raw </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'> <span class="nb">require</span> <span class="s1">&#39;flickraw&#39;</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">FlickrImage</span> <span class="o">&lt;</span> <span class="no">Liquid</span><span class="o">::</span><span class="no">Tag</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">tag_name</span><span class="p">,</span> <span class="n">markup</span><span class="p">,</span> <span class="n">tokens</span><span class="p">)</span>
+</span><span class='line'>       <span class="k">super</span>
+</span><span class='line'>       <span class="vi">@markup</span> <span class="o">=</span> <span class="n">markup</span>
+</span><span class='line'>       <span class="vi">@id</span>   <span class="o">=</span> <span class="n">markup</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>       <span class="vi">@size</span> <span class="o">=</span> <span class="n">markup</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="no">FlickRaw</span><span class="o">.</span><span class="n">api_key</span>        <span class="o">=</span> <span class="s2">&quot;140be6b9e097f6847b75f886379c5055&quot;</span>
+</span><span class='line'>      <span class="no">FlickRaw</span><span class="o">.</span><span class="n">shared_secret</span>  <span class="o">=</span> <span class="s2">&quot;b8fdaad2b4cacdcf&quot;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">info</span> <span class="o">=</span> <span class="n">flickr</span><span class="o">.</span><span class="n">photos</span><span class="o">.</span><span class="n">getInfo</span><span class="p">(</span><span class="ss">:photo_id</span> <span class="o">=&gt;</span> <span class="vi">@id</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">server</span>        <span class="o">=</span> <span class="n">info</span><span class="o">[</span><span class="s1">&#39;server&#39;</span><span class="o">]</span>
+</span><span class='line'>      <span class="n">farm</span>          <span class="o">=</span> <span class="n">info</span><span class="o">[</span><span class="s1">&#39;farm&#39;</span><span class="o">]</span>
+</span><span class='line'>      <span class="nb">id</span>            <span class="o">=</span> <span class="n">info</span><span class="o">[</span><span class="s1">&#39;id&#39;</span><span class="o">]</span>
+</span><span class='line'>      <span class="n">title</span>         <span class="o">=</span> <span class="n">info</span><span class="o">[</span><span class="s1">&#39;title&#39;</span><span class="o">]</span>
+</span><span class='line'>      <span class="n">description</span>   <span class="o">=</span> <span class="n">info</span><span class="o">[</span><span class="s1">&#39;description&#39;</span><span class="o">]</span>
+</span><span class='line'>      <span class="n">size</span>          <span class="o">=</span> <span class="s2">&quot;_</span><span class="si">#{</span><span class="vi">@size</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="vi">@size</span>
+</span><span class='line'>      <span class="k">if</span> <span class="vi">@size</span> <span class="o">==</span> <span class="s2">&quot;o&quot;</span> <span class="k">then</span>
+</span><span class='line'>          <span class="n">secret</span> <span class="o">=</span> <span class="n">info</span><span class="o">[</span><span class="s1">&#39;originalsecret&#39;</span><span class="o">]</span>
+</span><span class='line'>          <span class="nb">format</span> <span class="o">=</span> <span class="n">info</span><span class="o">[</span><span class="s1">&#39;originalformat&#39;</span><span class="o">]</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>          <span class="n">secret</span> <span class="o">=</span> <span class="n">info</span><span class="o">[</span><span class="s1">&#39;secret&#39;</span><span class="o">]</span>
+</span><span class='line'>          <span class="nb">format</span> <span class="o">=</span> <span class="s2">&quot;jpg&quot;</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>      <span class="n">src</span>           <span class="o">=</span> <span class="s2">&quot;http://farm</span><span class="si">#{</span><span class="n">farm</span><span class="si">}</span><span class="s2">.static.flickr.com/</span><span class="si">#{</span><span class="n">server</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="nb">id</span><span class="si">}</span><span class="s2">_</span><span class="si">#{</span><span class="n">secret</span><span class="si">}#{</span><span class="n">size</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="nb">format</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="n">page_url</span>      <span class="o">=</span> <span class="n">info</span><span class="o">[</span><span class="s1">&#39;urls&#39;</span><span class="o">][</span><span class="mi">0</span><span class="o">][</span><span class="s2">&quot;_content&quot;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">img_tag</span>       <span class="o">=</span> <span class="s2">&quot;&lt;img src=&#39;</span><span class="si">#{</span><span class="n">src</span><span class="si">}</span><span class="s2">&#39; title=&#39;</span><span class="si">#{</span><span class="n">title</span><span class="si">}</span><span class="s2">&#39;/&gt;&quot;</span>
+</span><span class='line'>      <span class="n">link_tag</span>      <span class="o">=</span> <span class="s2">&quot;&lt;a href=&#39;</span><span class="si">#{</span><span class="n">page_url</span><span class="si">}</span><span class="s2">&#39;&gt;</span><span class="si">#{</span><span class="n">img_tag</span><span class="si">}</span><span class="s2">&lt;/a&gt;&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="no">Liquid</span><span class="o">::</span><span class="no">Template</span><span class="o">.</span><span class="n">register_tag</span><span class="p">(</span><span class="s1">&#39;flickrimage&#39;</span><span class="p">,</span> <span class="no">FlickrImage</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
 
-  def initialize(tag_name, markup, tokens)
-     super
-     @markup = markup
-     @id   = markup.split(' ')[0]
-     @size = markup.split(' ')[1]
-  end 
-
-  def render(context)
-
-    FlickRaw.api_key        = "140be6b9e097f6847b75f886379c5055"
-    FlickRaw.shared_secret  = "b8fdaad2b4cacdcf"
-
-    info = flickr.photos.getInfo(:photo_id =&gt; @id)
-
-    server        = info['server']
-    farm          = info['farm']
-    id            = info['id']
-    title         = info['title']
-    description   = info['description']
-    size          = "_#{@size}" if @size
-    if @size == "o" then
-        secret = info['originalsecret']
-        format = info['originalformat']
-    else
-        secret = info['secret']
-        format = "jpg"
-    end 
-    src           = "http://farm#{farm}.static.flickr.com/#{server}/#{id}_#{secret}#{size}.#{format}"
-    page_url      = info['urls'][0]["_content"]
-
-    img_tag       = "&lt;img src='#{src}' title='#{title}'/&gt;"
-    link_tag      = "&lt;a href='#{page_url}'&gt;#{img_tag}&lt;/a&gt;"
-
-  end 
-end
-
-Liquid::Template.register_tag('flickrimage', FlickrImage)
-</code></pre>
 
 <p>經過這樣更改後要插入 Original 的圖片就沒有問題了。</p>
 

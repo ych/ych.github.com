@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Octopress | 無盡的三拍子]]></title>
   <link href="http://blog.ychuang.org/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://blog.ychuang.org/"/>
-  <updated>2012-11-14T14:56:05+08:00</updated>
+  <updated>2012-11-14T15:26:38+08:00</updated>
   <id>http://blog.ychuang.org/</id>
   <author>
     <name><![CDATA[ych]]></name>
@@ -20,51 +20,99 @@
     <id>http://blog.ychuang.org/blog/2012/11/14/insert-a-image-from-flickr-in-octopress</id>
     <content type="html"><![CDATA[<p>昨天看了一下<a href="http://blog.ychuang.org/blog/2012/11/12/create-a-router-which-connect-many-lans-in-esxi/">前天寫的文章</a>，發現有一點難以閱讀，所以想說應該放些圖。說到放圖在 Blog 的方法的話，當然是先把圖放在圖床在 include 進來才是王道。剛好我有使用 <a href="http://www.flickr.com/photos/songsongboy/">Flickr</a>，所以便開始 Survey 方法，結果找到了 <a href="http://blog.pixarea.com/2012/07/fetch-images-from-flickr-to-show-in-octopress-slash-jekyll">這個網頁</a>。</p>
 
-<p>試了一下，發現這個 plugin 要插入 Original 的圖片時會有點問題 (VIP 錯了嗎？)，所以稍微研究了一下，發現 Original 的圖片透過 Flickr 的 API 的拿法跟其他大小的圖片會不太一下，所以自己把上面網頁提供的 API 更新如下：</p>
-
-<pre><code>require 'flickraw'                                                                                                                            
-class FlickrImage &lt; Liquid::Tag
-
-  def initialize(tag_name, markup, tokens)
-     super
-     @markup = markup
-     @id   = markup.split(' ')[0]
-     @size = markup.split(' ')[1]
-  end 
-
-  def render(context)
-
-    FlickRaw.api_key        = "140be6b9e097f6847b75f886379c5055"
-    FlickRaw.shared_secret  = "b8fdaad2b4cacdcf"
-
-    info = flickr.photos.getInfo(:photo_id =&gt; @id)
-
-    server        = info['server']
-    farm          = info['farm']
-    id            = info['id']
-    title         = info['title']
-    description   = info['description']
-    size          = "_#{@size}" if @size
-    if @size == "o" then
-        secret = info['originalsecret']
-        format = info['originalformat']
-    else
-        secret = info['secret']
-        format = "jpg"
-    end 
-    src           = "http://farm#{farm}.static.flickr.com/#{server}/#{id}_#{secret}#{size}.#{format}"
-    page_url      = info['urls'][0]["_content"]
-
-    img_tag       = "&lt;img src='#{src}' title='#{title}'/&gt;"
-    link_tag      = "&lt;a href='#{page_url}'&gt;#{img_tag}&lt;/a&gt;"
-
-  end 
-end
-
-Liquid::Template.register_tag('flickrimage', FlickrImage)
-</code></pre>
-
-<p>經過這樣更改後要插入 Original 的圖片就沒有問題了。</p>
+<p>試了一下，發現這個 plugin 要插入 Original 的圖片時會有點問題 (VIP 錯了嗎？)，所以稍微研究了一下，發現 Original 的圖片透過 Flickr 的 API 的拿法跟其他大小的圖片會不太一下，所以自己把上面網頁提供的 API 更新如下：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>flickr.rb </span><a href='https://raw.github.com/gist/4070800/a350c076a56064016de9b4a740ce594ced3dc49b/FlickrImage'>view raw </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;require &#39;flickraw&#39;                                                                                                                            </span>
+</span><span class='line'><span class="sr">class FlickrImage &amp;lt; Liquid::Tag</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  def initialize(tag_name, markup, tokens)</span>
+</span><span class='line'><span class="sr">     super</span>
+</span><span class='line'><span class="sr">     @markup = markup</span>
+</span><span class='line'><span class="sr">     @id   = markup.split(&#39; &#39;)[0]</span>
+</span><span class='line'><span class="sr">     @size = markup.split(&#39; &#39;)[1]</span>
+</span><span class='line'><span class="sr">  end </span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">  def render(context)</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">    FlickRaw.api_key        = &quot;140be6b9e097f6847b75f886379c5055&quot;</span>
+</span><span class='line'><span class="sr">    FlickRaw.shared_secret  = &quot;b8fdaad2b4cacdcf&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">    info = flickr.photos.getInfo(:photo_id =&amp;gt; @id)</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">    server        = info[&#39;server&#39;]</span>
+</span><span class='line'><span class="sr">    farm          = info[&#39;farm&#39;]</span>
+</span><span class='line'><span class="sr">    id            = info[&#39;id&#39;]</span>
+</span><span class='line'><span class="sr">    title         = info[&#39;title&#39;]</span>
+</span><span class='line'><span class="sr">    description   = info[&#39;description&#39;]</span>
+</span><span class='line'><span class="sr">    size          = &quot;_</span><span class="si">#{</span><span class="vi">@size</span><span class="si">}</span><span class="sr">&quot; if @size</span>
+</span><span class='line'><span class="sr">    if @size == &quot;o&quot; then</span>
+</span><span class='line'><span class="sr">        secret = info[&#39;originalsecret&#39;]</span>
+</span><span class='line'><span class="sr">        format = info[&#39;originalformat&#39;]</span>
+</span><span class='line'><span class="sr">    else</span>
+</span><span class='line'><span class="sr">        secret = info[&#39;secret&#39;]</span>
+</span><span class='line'><span class="sr">        format = &quot;jpg&quot;</span>
+</span><span class='line'><span class="sr">    end </span>
+</span><span class='line'><span class="sr">    src           = &quot;http:/</span><span class="o">/</span><span class="n">farm</span><span class="c1">#{farm}.static.flickr.com/#{server}/#{id}_#{secret}#{size}.#{format}&quot;</span>
+</span><span class='line'>    <span class="n">page_url</span>      <span class="o">=</span> <span class="n">info</span><span class="o">[</span><span class="s1">&#39;urls&#39;</span><span class="o">][</span><span class="mi">0</span><span class="o">][</span><span class="s2">&quot;_content&quot;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">img_tag</span>       <span class="o">=</span> <span class="s2">&quot;&amp;lt;img src=&#39;</span><span class="si">#{</span><span class="n">src</span><span class="si">}</span><span class="s2">&#39; title=&#39;</span><span class="si">#{</span><span class="n">title</span><span class="si">}</span><span class="s2">&#39;/&amp;gt;&quot;</span>
+</span><span class='line'>    <span class="n">link_tag</span>      <span class="o">=</span> <span class="s2">&quot;&amp;lt;a href=&#39;</span><span class="si">#{</span><span class="n">page_url</span><span class="si">}</span><span class="s2">&#39;&amp;gt;</span><span class="si">#{</span><span class="n">img_tag</span><span class="si">}</span><span class="s2">&amp;lt;/a&amp;gt;&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Liquid</span><span class="o">::</span><span class="no">Template</span><span class="o">.</span><span class="n">register_tag</span><span class="p">(</span><span class="s1">&#39;flickrimage&#39;</span><span class="p">,</span> <span class="no">FlickrImage</span><span class="p">)</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+經過這樣更改後要插入 Original 的圖片就沒有問題了。</p>
 ]]></content>
   </entry>
   
