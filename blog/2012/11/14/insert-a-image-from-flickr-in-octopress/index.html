@@ -1,0 +1,177 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Insert a image from Flickr in Octopress - 無盡的三拍子</title>
+	<meta name="author" content="ych">
+
+	
+	<meta name="description" content="昨天看了一下前天寫的文章，發現有一點難以閱讀，所以想說應該放些圖。說到放圖在 Blog 的方法的話，當然是先把圖放在圖床在 include 進來才是王道。剛好我有使用 Flickr，所以便開始 Survey 方法，結果找到了 這個網頁。 試了一下，發現這個 plugin 要插入 Original &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="無盡的三拍子" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">無盡的三拍子</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:blog.ychuang.org">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:blog.ychuang.org">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h1 class="title">Insert a Image From Flickr in Octopress</h1>
+	<div class="entry-content"><p>昨天看了一下<a href="http://blog.ychuang.org/blog/2012/11/12/create-a-router-which-connect-many-lans-in-esxi/">前天寫的文章</a>，發現有一點難以閱讀，所以想說應該放些圖。說到放圖在 Blog 的方法的話，當然是先把圖放在圖床在 include 進來才是王道。剛好我有使用 <a href="http://www.flickr.com/photos/songsongboy/">Flickr</a>，所以便開始 Survey 方法，結果找到了 <a href="http://blog.pixarea.com/2012/07/fetch-images-from-flickr-to-show-in-octopress-slash-jekyll">這個網頁</a>。</p>
+
+<p>試了一下，發現這個 plugin 要插入 Original 的圖片時會有點問題 (VIP 錯了嗎？)，所以稍微研究了一下，發現 Original 的圖片透過 Flickr 的 API 的拿法跟其他大小的圖片會不太一下，所以自己把上面網頁提供的 API 更新如下：</p>
+
+<pre><code>require 'flickraw'                                                                                                                            
+class FlickrImage &lt; Liquid::Tag
+
+  def initialize(tag_name, markup, tokens)
+     super
+     @markup = markup
+     @id   = markup.split(' ')[0]
+     @size = markup.split(' ')[1]
+  end 
+
+  def render(context)
+
+    FlickRaw.api_key        = "140be6b9e097f6847b75f886379c5055"
+    FlickRaw.shared_secret  = "b8fdaad2b4cacdcf"
+
+    info = flickr.photos.getInfo(:photo_id =&gt; @id)
+
+    server        = info['server']
+    farm          = info['farm']
+    id            = info['id']
+    title         = info['title']
+    description   = info['description']
+    size          = "_#{@size}" if @size
+    if @size == "o" then
+        secret = info['originalsecret']
+        format = info['originalformat']
+    else
+        secret = info['secret']
+        format = "jpg"
+    end 
+    src           = "http://farm#{farm}.static.flickr.com/#{server}/#{id}_#{secret}#{size}.#{format}"
+    page_url      = info['urls'][0]["_content"]
+
+    img_tag       = "&lt;img src='#{src}' title='#{title}'/&gt;"
+    link_tag      = "&lt;a href='#{page_url}'&gt;#{img_tag}&lt;/a&gt;"
+
+  end 
+end
+
+Liquid::Template.register_tag('flickrimage', FlickrImage)
+</code></pre>
+
+<p>經過這樣更改後要插入 Original 的圖片就沒有問題了。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-14T12:06:00+08:00" pubdate data-updated="true">Nov 14<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+</div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2012
+
+    ych
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+</body>
+</html>

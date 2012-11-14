@@ -7,7 +7,7 @@
 	<meta name="author" content="ych">
 
 	
-	<meta name="description" content="之前工作上有個需求，是在 ESXi 內區分出多個 LAN ，以便各同仁可以方便做 L2 實驗而不被干擾。但同時也要可以與其他同仁位在不同 LAN 的機器互連。 要滿足以上條件，直覺的想法就是切出不同的 IP 網段，中間透過一台虛擬機器來做 routing，所以不同同仁互連是透過 L3，自己互連是 &hellip;">
+	<meta name="description" content="昨天看了一下前天寫的文章，發現有一點難以閱讀，所以想說應該放些圖。說到放圖在 Blog 的方法的話，當然是先把圖放在圖床在 include 進來才是王道。剛好我有使用 Flickr，所以便開始 Survey 方法，結果找到了 這個網頁。 試了一下，發現這個 plugin 要插入 Original &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -70,6 +70,83 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/11/14/insert-a-image-from-flickr-in-octopress/">Insert a Image From Flickr in Octopress</a></h1>
+	<div class="entry-content">
+		<p>昨天看了一下<a href="http://blog.ychuang.org/blog/2012/11/12/create-a-router-which-connect-many-lans-in-esxi/">前天寫的文章</a>，發現有一點難以閱讀，所以想說應該放些圖。說到放圖在 Blog 的方法的話，當然是先把圖放在圖床在 include 進來才是王道。剛好我有使用 <a href="http://www.flickr.com/photos/songsongboy/">Flickr</a>，所以便開始 Survey 方法，結果找到了 <a href="http://blog.pixarea.com/2012/07/fetch-images-from-flickr-to-show-in-octopress-slash-jekyll">這個網頁</a>。</p>
+
+<p>試了一下，發現這個 plugin 要插入 Original 的圖片時會有點問題 (VIP 錯了嗎？)，所以稍微研究了一下，發現 Original 的圖片透過 Flickr 的 API 的拿法跟其他大小的圖片會不太一下，所以自己把上面網頁提供的 API 更新如下：</p>
+
+<pre><code>require 'flickraw'                                                                                                                            
+class FlickrImage &lt; Liquid::Tag
+
+  def initialize(tag_name, markup, tokens)
+     super
+     @markup = markup
+     @id   = markup.split(' ')[0]
+     @size = markup.split(' ')[1]
+  end 
+
+  def render(context)
+
+    FlickRaw.api_key        = "140be6b9e097f6847b75f886379c5055"
+    FlickRaw.shared_secret  = "b8fdaad2b4cacdcf"
+
+    info = flickr.photos.getInfo(:photo_id =&gt; @id)
+
+    server        = info['server']
+    farm          = info['farm']
+    id            = info['id']
+    title         = info['title']
+    description   = info['description']
+    size          = "_#{@size}" if @size
+    if @size == "o" then
+        secret = info['originalsecret']
+        format = info['originalformat']
+    else
+        secret = info['secret']
+        format = "jpg"
+    end 
+    src           = "http://farm#{farm}.static.flickr.com/#{server}/#{id}_#{secret}#{size}.#{format}"
+    page_url      = info['urls'][0]["_content"]
+
+    img_tag       = "&lt;img src='#{src}' title='#{title}'/&gt;"
+    link_tag      = "&lt;a href='#{page_url}'&gt;#{img_tag}&lt;/a&gt;"
+
+  end 
+end
+
+Liquid::Template.register_tag('flickrimage', FlickrImage)
+</code></pre>
+
+<p>經過這樣更改後要插入 Original 的圖片就沒有問題了。</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-14T12:06:00+08:00" pubdate data-updated="true">Nov 14<span>th</span>, 2012</time></div>
+	<div class="tags">
+
+</div>
+	
+</div></article>
 
 
     <article class="post">
