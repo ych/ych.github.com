@@ -4,7 +4,7 @@
   <title><![CDATA[無盡的三拍子]]></title>
   <link href="http://blog.ychuang.org/atom.xml" rel="self"/>
   <link href="http://blog.ychuang.org/"/>
-  <updated>2012-11-12T23:14:00+08:00</updated>
+  <updated>2012-11-14T10:38:30+08:00</updated>
   <id>http://blog.ychuang.org/</id>
   <author>
     <name><![CDATA[ych]]></name>
@@ -18,15 +18,15 @@
     <link href="http://blog.ychuang.org/blog/2012/11/12/create-a-router-which-connect-many-lans-in-esxi/"/>
     <updated>2012-11-12T21:26:00+08:00</updated>
     <id>http://blog.ychuang.org/blog/2012/11/12/create-a-router-which-connect-many-lans-in-esxi</id>
-    <content type="html"><![CDATA[<p>之前工作上有個需求，是在 ESXi 內區分出多個 LAN ，以便各同仁可以方便做 L2 實驗而不被干擾。但同時也要可以與其他同仁的機器互連。</p>
+    <content type="html"><![CDATA[<p>之前工作上有個需求，是在 ESXi 內區分出多個 LAN ，以便各同仁可以方便做 L2 實驗而不被干擾。但同時也要可以與其他同仁位在不同 LAN 的機器互連。</p>
 
-<p>要滿足以上條件，就是切出不同的 IP 網段，中間透過一台虛擬機器來做 routing，所以不同同仁互連是透過 L3，自己互連是 L2。</p>
+<p>要滿足以上條件，直覺的想法就是切出不同的 IP 網段，中間透過一台虛擬機器來做 routing，所以不同同仁互連是透過 L3，自己互連是 L2。</p>
 
-<p>原本在人少的時候這件事情非常的好處理，就是每位同仁各自有台透過 ESXi 模擬出來的 switch，然後在這台虛擬機器建立出多個網卡，每個網卡各自連到每台 swtich 上，並 bind 各 LAN 上面的網段 IP 即可。然後各網段上的機器，把這台虛擬機器在該網段的 IP 設定成 Gateway。</p>
+<p>原本在人少的時候這件事情非常的好處理，就是每位同仁各自有台透過 ESXi 模擬出來的 switch，然後在這台作為 router 的虛擬機器建立出多個網卡，每個網卡各自連到每台 swtich 上，並 bind 各 LAN 上面的網段 IP 即可。然後各網段上的機器，把這台虛擬機器在該網段的 IP 設定成 Gateway。</p>
 
 <p>但是好景不長，當某位新同仁加入，我幫忙進行對應的環境設定時，我發現一台機器可以加的網卡是有上限的，所以這個方法已經無法符合我們的需求。</p>
 
-<p>原本是想說再加入一台虛擬機器，然後分成兩個網段各自 routing，但這只是治標不治本的方法，只要人再多上去，之後就還要再加一台虛擬機器。</p>
+<p>原本是想說再加入一台虛擬機器，然後分成兩個網段各自 routing，但這只是治標不治本的方法，只要同仁人數繼續增加，之後就還要再加一台虛擬機器。</p>
 
 <p>這時當時還在公司的前輩 <a href="http://chenpc.csie.in/" title="春有百花秋有月">chenpc</a> 就指點我或許可以從透過 vlan 的解決方案來思考。</p>
 
@@ -34,7 +34,11 @@
 
 <p>然後讓虛擬機器的網卡使用該 switch 的 vlan 4095 (可以聽到該 switch 上所有的 vlan 封包，ESXi 的特殊設定)，在加上虛擬機器內做一些設定，就可以使用一張網卡做到一樣的事情。</p>
 
-<p>以 Debian/Ubuntu 為例：</p>
+<p>ESXi 的網路設定：</p>
+
+<p><a href='http://www.flickr.com/photos/songsongboy/8183904144/'><img src='http://farm9.static.flickr.com/8205/8183904144_3e9c2dbd58_b.jpg' title='ESXi Network'/></a></p>
+
+<p>Router 虛擬機器的設定，以 Debian/Ubuntu 為例：</p>
 
 <ol>
 <li>編輯 /etc/sysctl.conf，加上下列這行，以讓收到的封包可以穿過本台機器，透過不同的網卡進行傳送
