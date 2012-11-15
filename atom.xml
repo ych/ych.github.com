@@ -4,7 +4,7 @@
   <title><![CDATA[無盡的三拍子]]></title>
   <link href="http://blog.ychuang.org/atom.xml" rel="self"/>
   <link href="http://blog.ychuang.org/"/>
-  <updated>2012-11-14T20:57:39+08:00</updated>
+  <updated>2012-11-15T17:47:19+08:00</updated>
   <id>http://blog.ychuang.org/</id>
   <author>
     <name><![CDATA[ych]]></name>
@@ -12,6 +12,126 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Install omnitty on Debian/Ubuntu]]></title>
+    <link href="http://blog.ychuang.org/blog/2012/11/15/install-omnitty-on-debian-slash-ubuntu/"/>
+    <updated>2012-11-15T17:33:00+08:00</updated>
+    <id>http://blog.ychuang.org/blog/2012/11/15/install-omnitty-on-debian-slash-ubuntu</id>
+    <content type="html"><![CDATA[<p>這軟體的詳細功能可以看 <a href="http://blog.gslin.org/archives/2006/06/07/639/omnitty/">gslin 的介紹</a>，簡單來說很適合大量管理機器時使用</p>
+
+<p>下面是無腦的安裝 script，適用於 Debian/Ubuntu，有做基本的 md5 檢查 (我懶的打包成 dpkg 了&#8230;XD)</p>
+
+<figure class='code'><figcaption><span>install-script.sh </span><a href='https://raw.github.com/gist/4077637/201f8371b73c52edc1b74a2af5a5397d59a7c33a/install-script.sh'>view raw </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c">#!/bin/sh</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">dir</span><span class="o">=</span><span class="sb">`</span>mktemp -d<span class="sb">`</span>
+</span><span class='line'><span class="nv">oridir</span><span class="o">=</span><span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>
+</span><span class='line'><span class="nb">cd</span> <span class="nv">$dir</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="o">[</span> -x <span class="s2">&quot;/usr/bin/wget&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+</span><span class='line'><span class="k">        </span>wget https://gist.github.com/raw/4077456/45864036e823a8b7faaf5fb2f179486e0500740d/md5sums
+</span><span class='line'>        wget https://gist.github.com/raw/4077459/7ba155894489c1be43875d0092da91a7eaeb2d7b/omnitty.conf
+</span><span class='line'>        wget http://downloads.sourceforge.net/project/rote/rote/rote-0.2.8/rote-0.2.8.tar.gz
+</span><span class='line'>        wget http://downloads.sourceforge.net/project/omnitty/omnitty/omnitty-0.3.0/omnitty-0.3.0.tar.gz
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'><span class="k">        </span><span class="nb">echo</span> <span class="s2">&quot;Please install wget!&quot;</span>
+</span><span class='line'>        <span class="nb">cd</span> <span class="nv">$oridir</span>
+</span><span class='line'>        rm -rf <span class="nv">$dir</span>
+</span><span class='line'>        <span class="nb">exit</span>
+</span><span class='line'><span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'>md5sum -c md5sums
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne 0 <span class="o">]</span>; <span class="k">then</span>
+</span><span class='line'><span class="k">        </span><span class="nb">echo</span> <span class="s2">&quot;Please execution again!&quot;</span>
+</span><span class='line'>        <span class="nb">cd</span> <span class="nv">$oridir</span>
+</span><span class='line'>        rm -rf <span class="nv">$dir</span>
+</span><span class='line'>        <span class="nb">exit</span>
+</span><span class='line'><span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="o">[</span> -x <span class="s2">&quot;/usr/bin/aptitude&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+</span><span class='line'><span class="k">        </span>sudo aptitude -y install libc-dev libncurses-dev
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'><span class="k">        </span>sudo apt-get -y install libc-dev libncurses-dev
+</span><span class='line'><span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'>tar -xvf rote-0.2.8.tar.gz
+</span><span class='line'>tar -xvf omnitty-0.3.0.tar.gz
+</span><span class='line'>
+</span><span class='line'><span class="nb">cd </span>rote-0.2.8
+</span><span class='line'>./configure
+</span><span class='line'>make
+</span><span class='line'>sudo make install
+</span><span class='line'>
+</span><span class='line'><span class="nb">cd</span> ../omnitty-0.3.0
+</span><span class='line'>./configure
+</span><span class='line'>make
+</span><span class='line'>sudo make install
+</span><span class='line'>
+</span><span class='line'><span class="nb">cd</span> ..
+</span><span class='line'>sudo cp omnitty.conf /etc/ld.so.conf.d/
+</span><span class='line'>sudo ldconfig
+</span><span class='line'>
+</span><span class='line'><span class="nb">cd</span> <span class="nv">$oridir</span>
+</span><span class='line'>rm -rf <span class="nv">$dir</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Insert a image from Flickr in Octopress]]></title>
