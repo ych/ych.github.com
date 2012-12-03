@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Octopress | 無盡的三拍子]]></title>
   <link href="http://blog.ychuang.org/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://blog.ychuang.org/"/>
-  <updated>2012-11-15T17:47:19+08:00</updated>
+  <updated>2012-12-03T10:32:53+08:00</updated>
   <id>http://blog.ychuang.org/</id>
   <author>
     <name><![CDATA[ych]]></name>
@@ -80,8 +80,8 @@
 </span><span class='line'>
 </span><span class='line'><span class="sr">  def render(context)</span>
 </span><span class='line'>
-</span><span class='line'><span class="sr">    FlickRaw.api_key        = &quot;140be6b9e097f6847b75f886379c5055&quot;</span>
-</span><span class='line'><span class="sr">    FlickRaw.shared_secret  = &quot;b8fdaad2b4cacdcf&quot;</span>
+</span><span class='line'><span class="sr">    FlickRaw.api_key        = &quot;&quot; # Enter your API key</span>
+</span><span class='line'><span class="sr">    FlickRaw.shared_secret  = &quot;&quot; # Enter your shared secret</span>
 </span><span class='line'>
 </span><span class='line'><span class="sr">    info = flickr.photos.getInfo(:photo_id =&amp;gt; @id)</span>
 </span><span class='line'>
