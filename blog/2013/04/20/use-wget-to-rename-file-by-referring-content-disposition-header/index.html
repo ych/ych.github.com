@@ -7,7 +7,7 @@
 	<meta name="author" content="ych">
 
 	
-	<meta name="description" content="有些時候你會發現，透過瀏覽器下載某些 CGI 提供的檔案，存下來的檔案會被正確的命名。但是透過 wget 去下載，他的檔名就只能根據你提供的網址去命名。這是因為瀏覽器會去參考 Content-Disposition 這個 header 欄位。 讓 wget 去參考這個欄位的方法也不難，加入 &# &hellip;">
+	<meta name="description" content="有些時候你會發現，透過瀏覽器下載某些 CGI 提供的檔案，存下來的檔案會被正確的命名。但是透過 wget 去下載，他的檔名就只能根據你提供的網址去命名。這是因為瀏覽器會去參考 Content-Disposition 這個 header 欄位來重新對檔案命名。 讓 wget &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -82,7 +82,7 @@
 	
 	<div id="content" class="inner"><article class="post">
 	<h1 class="title">Use Wget to Rename File by Referring "Content-Disposition" Header</h1>
-	<div class="entry-content"><p>有些時候你會發現，透過瀏覽器下載某些 CGI 提供的檔案，存下來的檔案會被正確的命名。但是透過 wget 去下載，他的檔名就只能根據你提供的網址去命名。這是因為瀏覽器會去參考 Content-Disposition 這個 header 欄位。</p>
+	<div class="entry-content"><p>有些時候你會發現，透過瀏覽器下載某些 CGI 提供的檔案，存下來的檔案會被正確的命名。但是透過 wget 去下載，他的檔名就只能根據你提供的網址去命名。這是因為瀏覽器會去參考 Content-Disposition 這個 header 欄位來重新對檔案命名。</p>
 
 <p>讓 wget 去參考這個欄位的方法也不難，加入 &#8220;&#8211;content-disposition&#8221; 參數即可。可是根據 man 的結果，此參數可能會有一些 bugs ，請小心使用。</p>
 </div>
