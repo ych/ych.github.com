@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 系統與網路管理 | 無盡的三拍子]]></title>
   <link href="http://blog.ychuang.org/blog/categories/系統與網路管理/atom.xml" rel="self"/>
   <link href="http://blog.ychuang.org/"/>
-  <updated>2012-12-03T10:32:53+08:00</updated>
+  <updated>2013-04-20T15:16:05+08:00</updated>
   <id>http://blog.ychuang.org/</id>
   <author>
     <name><![CDATA[ych]]></name>
@@ -12,6 +12,17 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Use wget to rename file by referring "Content-Disposition" header]]></title>
+    <link href="http://blog.ychuang.org/blog/2013/04/20/use-wget-to-rename-file-by-referring-content-disposition-header/"/>
+    <updated>2013-04-20T15:00:00+08:00</updated>
+    <id>http://blog.ychuang.org/blog/2013/04/20/use-wget-to-rename-file-by-referring-content-disposition-header</id>
+    <content type="html"><![CDATA[<p>有些時候你會發現，透過瀏覽器下載某些 CGI 提供的檔案，存下來的檔案會被正確的命名。但是透過 wget 去下載，他的檔名就只能根據你提供的網址去命名。這是因為瀏覽器會去參考 Content-Disposition 這個 header 欄位。</p>
+
+<p>讓 wget 去參考這個欄位的方法也不難，加入 "--content-disposition" 參數即可。可是根據 man 的結果，此參數可能會有一些 bugs ，請小心使用。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Install omnitty on Debian/Ubuntu]]></title>
