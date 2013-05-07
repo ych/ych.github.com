@@ -1,0 +1,225 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>GVariant with floating reference count - 無盡的三拍子</title>
+	<meta name="author" content="ych">
+
+	
+	<meta name="description" content="最近在使用 GVariant 時遇到了 memory leak 的問題，重點是這 memory leak 不一定會發生，讓我一度難以特定問題的發生源。 後來只好重編整個系統後用 gdb 找問題(原本用的是出貨版本的系統，編譯參數沒有 &#8220;-g&#8221;，很多工具也都沒有)。 透過 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="無盡的三拍子" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">無盡的三拍子</a></h1>
+<h2> ~ 徬徨、抉擇、發奮</h2>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="http://about.me/ych">About Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="http://about.me/ych">About Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:blog.ychuang.org">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		<a class="facebook" href="http://www.facebook.com/songsongboy" title="Facebook">Facebook</a>
+		
+		
+		<a class="google" href="https://plus.google.com/104294802659661726601?rel=author" title="Google+">Google+</a>
+		
+		
+		
+		<a class="github" href="https://github.com/ych" title="GitHub">GitHub</a>
+		
+		
+		<a class="linkedin" href="http://www.linkedin.com/in/songsongboy">LinkedIn</a>
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:blog.ychuang.org">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h1 class="title">GVariant With Floating Reference Count</h1>
+	<div class="entry-content"><p>最近在使用 GVariant 時遇到了 memory leak 的問題，重點是這 memory leak 不一定會發生，讓我一度難以特定問題的發生源。</p>
+
+<p>後來只好重編整個系統後用 gdb 找問題(原本用的是出貨版本的系統，編譯參數沒有 &#8220;-g&#8221;，很多工具也都沒有)。</p>
+
+<p>透過</p>
+
+<blockquote><p>watch ((GVariant *)0xmaskaddress)->ref_count</p></blockquote>
+
+<p>進行增減 ref-count 的監控，很快的就發現在 g_variant_ref_sink 中，某些 GVariant 的 ref-count 會增加，有些卻不會。</p>
+
+<p>跑去看 source code</p>
+
+<figure class='code'><figcaption><span>g_variant_ref_sink </span><a href='https://gist.github.com/ych/5530210/raw/24f59b03c065ef1e9d0594fcf940a3988b6be038/g_variant_ref_sink'>view raw </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">GVariant</span> <span class="o">*</span>
+</span><span class='line'><span class="nf">g_variant_ref_sink</span> <span class="p">(</span><span class="n">GVariant</span> <span class="o">*</span><span class="n">value</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">g_return_val_if_fail</span> <span class="p">(</span><span class="n">value</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">g_return_val_if_fail</span> <span class="p">(</span><span class="n">value</span><span class="o">-&gt;</span><span class="n">ref_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">g_variant_lock</span> <span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">value</span><span class="o">-&gt;</span><span class="n">state</span> <span class="o">&amp;</span> <span class="n">STATE_FLOATING</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">g_variant_ref</span> <span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">value</span><span class="o">-&gt;</span><span class="n">state</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">STATE_FLOATING</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">g_variant_unlock</span> <span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="n">value</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再看看上面寫的註解，才發現有些傳給我寫的 library 處理的 GVariant 是透過 g_variant_new* 系列的 function 產生的，有些不是(例如 g_variant_parse)。</p>
+
+<p>所以當我將其拿來生出一個新的 GVariant 時，floating GVariant 只會轉為 normal GVariant ，但是 normal GVariant 會將 ref-count 加 1 。</p>
+
+<p>關於 floating reference 的解釋，可以看看<a href="http://hi.baidu.com/sogreen82/item/81381b02969811d01ef046f8">這網頁</a></p>
+
+<p>這件事告訴我們：要用別人的 library 前，最好還是仔細看過文件，要不然遲早還是會把省下的時間連本帶利還回去的。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-07T11:52:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/程式設計/'>程式設計</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2013/05/07/gvariant-with-floating-reference-count/#disqus_thread">Comments</a></span>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    ych
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'songsongboy';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://blog.ychuang.org/blog/2013/05/07/gvariant-with-floating-reference-count/';
+        var disqus_url = 'http://blog.ychuang.org/blog/2013/05/07/gvariant-with-floating-reference-count/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

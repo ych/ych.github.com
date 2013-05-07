@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 程式設計 | 無盡的三拍子]]></title>
+  <link href="http://blog.ychuang.org/blog/categories/程式設計/atom.xml" rel="self"/>
+  <link href="http://blog.ychuang.org/"/>
+  <updated>2013-05-07T12:27:33+08:00</updated>
+  <id>http://blog.ychuang.org/</id>
+  <author>
+    <name><![CDATA[ych]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[GVariant with floating reference count]]></title>
+    <link href="http://blog.ychuang.org/blog/2013/05/07/gvariant-with-floating-reference-count/"/>
+    <updated>2013-05-07T11:52:00+08:00</updated>
+    <id>http://blog.ychuang.org/blog/2013/05/07/gvariant-with-floating-reference-count</id>
+    <content type="html"><![CDATA[<p>最近在使用 GVariant 時遇到了 memory leak 的問題，重點是這 memory leak 不一定會發生，讓我一度難以特定問題的發生源。</p>
+
+<p>後來只好重編整個系統後用 gdb 找問題(原本用的是出貨版本的系統，編譯參數沒有 "-g"，很多工具也都沒有)。</p>
+
+<p>透過</p>
+
+<blockquote><p>watch ((GVariant *)0xmaskaddress)->ref_count</p></blockquote>
+
+<p>進行增減 ref-count 的監控，很快的就發現在 g_variant_ref_sink 中，某些 GVariant 的 ref-count 會增加，有些卻不會。</p>
+
+<p>跑去看 source code
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>g_variant_ref_sink </span><a href='https://gist.github.com/ych/5530210/raw/24f59b03c065ef1e9d0594fcf940a3988b6be038/g_variant_ref_sink'>view raw </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">GVariant</span> <span class="o">*</span>
+</span><span class='line'><span class="nf">g_variant_ref_sink</span> <span class="p">(</span><span class="n">GVariant</span> <span class="o">*</span><span class="n">value</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">g_return_val_if_fail</span> <span class="p">(</span><span class="n">value</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">g_return_val_if_fail</span> <span class="p">(</span><span class="n">value</span><span class="o">-&gt;</span><span class="n">ref_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="n">g_variant_lock</span> <span class="p">(</span><span class="n">value</span><span class="p">);</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">value</span><span class="o">-&gt;</span><span class="n">state</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">STATE_FLOATING</span><span class="p">)</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">g_variant_ref</span> <span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">else</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">value</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">state</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="o">=</span> <span class="o">~</span><span class="n">STATE_FLOATING</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="n">g_variant_unlock</span> <span class="p">(</span><span class="n">value</span><span class="p">);</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">return</span> <span class="n">value</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+再看看上面寫的註解，才發現有些傳給我寫的 library 處理的 GVariant 是透過 g_variant_new* 系列的 function 產生的，有些不是(例如 g_variant_parse)。</p>
+
+<p>所以當我將其拿來生出一個新的 GVariant 時，floating GVariant 只會轉為 normal GVariant ，但是 normal GVariant 會將 ref-count 加 1 。</p>
+
+<p>關於 floating reference 的解釋，可以看看<a href="http://hi.baidu.com/sogreen82/item/81381b02969811d01ef046f8">這網頁</a></p>
+
+<p>這件事告訴我們：要用別人的 library 前，最好還是仔細看過文件，要不然遲早還是會把省下的時間連本帶利還回去的。</p>
+]]></content>
+  </entry>
+  
+</feed>
