@@ -4,7 +4,7 @@
   <title><![CDATA[無盡的三拍子]]></title>
   <link href="http://blog.ychuang.org/atom.xml" rel="self"/>
   <link href="http://blog.ychuang.org/"/>
-  <updated>2013-05-07T13:37:03+08:00</updated>
+  <updated>2013-09-09T11:37:58+08:00</updated>
   <id>http://blog.ychuang.org/</id>
   <author>
     <name><![CDATA[ych]]></name>
@@ -327,7 +327,7 @@
 
 <p>ESXi 的網路設定：</p>
 
-<p><a href='http://www.flickr.com/photos/songsongboy/8183952239/'><img src='http://farm9.static.flickr.com/8487/8183952239_68aec72a73_o.png' title='ESXi Network'/></a></p>
+<p>Liquid error: Connection refused - connect(2)</p>
 
 <p>Router 虛擬機器的設定，以 Debian/Ubuntu 為例：</p>
 
